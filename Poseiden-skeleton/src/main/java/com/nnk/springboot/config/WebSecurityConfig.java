@@ -28,13 +28,13 @@ public class WebSecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/register", "/login", "/logout").permitAll()
+                        .requestMatchers("/home", "/register", "/login", "/logout").permitAll()
                         .requestMatchers("/images/**", "/js/**", "/css/**", "/webjars/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin((form) -> form
                         .loginPage("/login")
-                        .defaultSuccessUrl("/home", true)
+                        .defaultSuccessUrl("/bidList/list", true)
                         .permitAll()
                 )
                 .logout((logout) -> logout
