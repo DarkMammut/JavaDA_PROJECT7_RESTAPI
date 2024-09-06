@@ -2,6 +2,7 @@ package com.nnk.springboot.domain;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,16 +11,17 @@ import java.sql.Timestamp;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "bidlist")
 public class BidList {
     // TODO: Map columns in data table BIDLIST with corresponding java fields
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "bidListId")
-    private Integer bidListId; // Renamed to follow Java naming conventions
+    @Column
+    private Integer bidListId;
 
-    @Column(name = "account", nullable = false, unique = true)
+    @Column(nullable = false, unique = true)
     private String account;
 
     @Column
@@ -46,40 +48,40 @@ public class BidList {
     @Column
     private String commentary;
 
-    @Column(name = "security")
+    @Column
     private String security;
 
-    @Column(name = "status")
+    @Column
     private String status;
 
-    @Column(name = "trader")
+    @Column
     private String trader;
 
-    @Column(name = "book")
+    @Column
     private String book;
 
-    @Column(name = "creationName")
+    @Column
     private String creationName;
 
-    @Column(name = "creationDate")
+    @Column
     private Timestamp creationDate;
 
-    @Column(name = "revisionName")
+    @Column
     private String revisionName;
 
-    @Column(name = "revisionDate")
+    @Column
     private Timestamp revisionDate;
 
-    @Column(name = "dealName")
+    @Column
     private String dealName;
 
-    @Column(name = "dealType")
+    @Column
     private String dealType;
 
-    @Column(name = "sourceListId")
+    @Column
     private String sourceListId;
 
-    @Column(name = "side")
+    @Column
     private String side;
 
 }

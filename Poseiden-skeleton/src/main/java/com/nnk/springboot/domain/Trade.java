@@ -16,67 +16,67 @@ public class Trade {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "tradeId")
+    @Column
     private Integer tradeId;
 
-    @Column(name = "account")
+    @Column
     private String account;
 
-    @Column(name = "type")
+    @Column
     private String type;
 
-    @Column(name = "buyQuantity")
+    @Column
     private Double buyQuantity;
 
-    @Column(name = "sellQuantity")
+    @Column
     private Double sellQuantity;
 
-    @Column(name = "buyPrice")
+    @Column
     private Double buyPrice;
 
-    @Column(name = "sellPrice")
+    @Column
     private Double sellPrice;
 
-    @Column(name = "benchmark")
+    @Column
     private String benchmark;
 
-    @Column(name = "tradeDate")
+    @Column
     private Timestamp tradeDate;
 
-    @Column(name = "security")
+    @Column
     private String security;
 
-    @Column(name = "status")
+    @Column
     private String status;
 
-    @Column(name = "trader")
+    @Column
     private String trader;
 
-    @Column(name = "book")
+    @Column
     private String book;
 
-    @Column(name = "creationName")
+    @Column
     private String creationName;
 
-    @Column(name = "creationDate")
+    @Column
     private Timestamp creationDate;
 
-    @Column(name = "revisionName")
+    @Column
     private String revisionName;
 
-    @Column(name = "revisionDate")
+    @Column
     private Timestamp revisionDate;
 
-    @Column(name = "dealName")
+    @Column
     private String dealName;
 
-    @Column(name = "dealType")
+    @Column
     private String dealType;
 
-    @Column(name = "sourceListId")
+    @Column
     private String sourceListId;
 
-    @Column(name = "side")
+    @Column
     private String side;
 
 }
