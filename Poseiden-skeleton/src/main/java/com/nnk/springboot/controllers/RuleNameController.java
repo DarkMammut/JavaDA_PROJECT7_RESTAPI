@@ -4,6 +4,8 @@ import com.nnk.springboot.domain.RuleName;
 import com.nnk.springboot.services.RuleNameService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -19,7 +21,7 @@ public class RuleNameController {
 private final RuleNameService ruleNameService;
 
     @RequestMapping("/ruleName/list")
-    public String home(Model model)
+    public String home(@AuthenticationPrincipal UserDetails currentUser, Model model)
     {
         // TODO: find all RuleName, add to model
         model.addAttribute("ruleNames", ruleNameService.getAllRuleNames());
@@ -27,12 +29,12 @@ private final RuleNameService ruleNameService;
     }
 
     @GetMapping("/ruleName/add")
-    public String addRuleForm(RuleName bid) {
+    public String addRuleForm(@AuthenticationPrincipal UserDetails currentUser, RuleName bid) {
         return "ruleName/add";
     }
 
     @PostMapping("/ruleName/validate")
-    public String validate(@Valid RuleName ruleName, BindingResult result, Model model) {
+    public String validate(@AuthenticationPrincipal UserDetails currentUser, @Valid RuleName ruleName, BindingResult result, Model model) {
         // TODO: check data valid and save to db, after saving return RuleName list
         if (result.hasErrors()) {
             return "ruleName/add";
@@ -42,7 +44,7 @@ private final RuleNameService ruleNameService;
     }
 
     @GetMapping("/ruleName/update/{id}")
-    public String showUpdateForm(@PathVariable("id") Integer id, Model model) {
+    public String showUpdateForm(@AuthenticationPrincipal UserDetails currentUser, @PathVariable("id") Integer id, Model model) {
         // TODO: get RuleName by Id and to model then show to the form
         RuleName ruleName = ruleNameService.getRuleNameById(id);
         model.addAttribute("ruleName", ruleName);
@@ -50,7 +52,7 @@ private final RuleNameService ruleNameService;
     }
 
     @PostMapping("/ruleName/update/{id}")
-    public String updateRuleName(@PathVariable("id") Integer id, @Valid RuleName ruleName,
+    public String updateRuleName(@AuthenticationPrincipal UserDetails currentUser, @PathVariable("id") Integer id, @Valid RuleName ruleName,
                              BindingResult result, Model model) {
         // TODO: check required fields, if valid call service to update RuleName and return RuleName list
         if (result.hasErrors()) {
@@ -62,7 +64,7 @@ private final RuleNameService ruleNameService;
     }
 
     @GetMapping("/ruleName/delete/{id}")
-    public String deleteRuleName(@PathVariable("id") Integer id, Model model) {
+    public String deleteRuleName(@AuthenticationPrincipal UserDetails currentUser, @PathVariable("id") Integer id, Model model) {
         // TODO: Find RuleName by Id and delete the RuleName, return to Rule list
         ruleNameService.deleteRuleName(id);
         return "redirect:/ruleName/list";

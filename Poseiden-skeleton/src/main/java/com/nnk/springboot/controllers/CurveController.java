@@ -3,8 +3,9 @@ package com.nnk.springboot.controllers;
 import com.nnk.springboot.domain.CurvePoint;
 import com.nnk.springboot.services.CurvePointService;
 import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -20,7 +21,7 @@ public class CurveController {
     private final CurvePointService curvePointService;
 
     @RequestMapping("/curvePoint/list")
-    public String home(Model model)
+    public String home(@AuthenticationPrincipal UserDetails currentUser, Model model)
     {
         // TODO: find all Curve Point, add to model
         model.addAttribute("curvePoints", curvePointService.getCurvePoints());
@@ -28,12 +29,12 @@ public class CurveController {
     }
 
     @GetMapping("/curvePoint/add")
-    public String addBidForm(CurvePoint bid) {
+    public String addBidForm(@AuthenticationPrincipal UserDetails currentUser, CurvePoint bid) {
         return "curvePoint/add";
     }
 
     @PostMapping("/curvePoint/validate")
-    public String validate(@Valid CurvePoint curvePoint, BindingResult result, Model model) {
+    public String validate(@AuthenticationPrincipal UserDetails currentUser, @Valid CurvePoint curvePoint, BindingResult result, Model model) {
         // TODO: check data valid and save to db, after saving return Curve list
         if (result.hasErrors()) {
             return "curvePoint/add";
@@ -43,7 +44,7 @@ public class CurveController {
     }
 
     @GetMapping("/curvePoint/update/{id}")
-    public String showUpdateForm(@PathVariable("id") Integer id, Model model) {
+    public String showUpdateForm(@AuthenticationPrincipal UserDetails currentUser, @PathVariable("id") Integer id, Model model) {
         // TODO: get CurvePoint by Id and to model then show to the form
         CurvePoint curvePoint = curvePointService.getCurvePointById(id);
         model.addAttribute("curvePoint", curvePoint);
@@ -51,7 +52,7 @@ public class CurveController {
     }
 
     @PostMapping("/curvePoint/update/{id}")
-    public String updateBid(@PathVariable("id") Integer id, @Valid CurvePoint curvePoint,
+    public String updateBid(@AuthenticationPrincipal UserDetails currentUser, @PathVariable("id") Integer id, @Valid CurvePoint curvePoint,
                              BindingResult result, Model model) {
         // TODO: check required fields, if valid call service to update Curve and return Curve list
         if (result.hasErrors()) {

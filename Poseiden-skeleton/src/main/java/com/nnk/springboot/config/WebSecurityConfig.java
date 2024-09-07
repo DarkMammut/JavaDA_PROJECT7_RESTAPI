@@ -30,6 +30,7 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers("/home", "/register", "/login", "/logout").permitAll()
                         .requestMatchers("/images/**", "/js/**", "/css/**", "/webjars/**").permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")  // Restrict access to admin paths
                         .anyRequest().authenticated()
                 )
                 .formLogin((form) -> form

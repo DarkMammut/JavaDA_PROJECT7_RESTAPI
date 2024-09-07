@@ -13,7 +13,7 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "bidlist")
+@Table(name = "BidList")
 public class BidList {
     // TODO: Map columns in data table BIDLIST with corresponding java fields
     @Id

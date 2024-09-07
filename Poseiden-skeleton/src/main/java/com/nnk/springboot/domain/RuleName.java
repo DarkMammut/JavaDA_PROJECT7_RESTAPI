@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "rulename")
+@Table(name = "RuleName")
 public class RuleName {
     // TODO: Map columns in data table RULENAME with corresponding java fields
     @Id
