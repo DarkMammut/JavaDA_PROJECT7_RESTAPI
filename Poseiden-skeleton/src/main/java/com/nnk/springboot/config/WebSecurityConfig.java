@@ -9,7 +9,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
@@ -20,17 +19,14 @@ public class WebSecurityConfig {
     private final UserService userDetailsService;
 
     @Bean
-    public BCryptPasswordEncoder bCryptPasswordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/home", "/register", "/login", "/logout").permitAll()
+                .authorizeHttpRequests((auth) -> auth
+                        .requestMatchers("/login").permitAll()
                         .requestMatchers("/images/**", "/js/**", "/css/**", "/webjars/**").permitAll()
-                        .requestMatchers("/admin/**").hasRole("ADMIN")  // Restrict access to admin paths
+//                        .requestMatchers("/admin/**").hasRole("ADMIN")
+//                        .requestMatchers("/user/**").hasRole("ADMIN")
+//                        .requestMatchers("/user/list").hasRole("ADMIN")// Restrict access to admin paths
                         .anyRequest().authenticated()
                 )
                 .formLogin((form) -> form
@@ -39,8 +35,8 @@ public class WebSecurityConfig {
                         .permitAll()
                 )
                 .logout((logout) -> logout
-                        .logoutUrl("/logout")
-                        .logoutSuccessUrl("/login")
+                        .logoutUrl("/app-logout")
+//                        .logoutSuccessUrl("/")
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID")
                 )
@@ -48,6 +44,9 @@ public class WebSecurityConfig {
                         .maximumSessions(1)
                         .maxSessionsPreventsLogin(false)
                 )
+//                .exceptionHandling((exception) -> exception
+//                        .accessDeniedPage("/403")
+//                )
                 .userDetailsService(userDetailsService);
 
         return http.build();

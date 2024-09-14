@@ -17,14 +17,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 @RequiredArgsConstructor
 public class RuleNameController {
-    // TODO: Inject RuleName service
-private final RuleNameService ruleNameService;
+    private final RuleNameService ruleNameService;
 
     @RequestMapping("/ruleName/list")
-    public String home(@AuthenticationPrincipal UserDetails currentUser, Model model)
-    {
-        // TODO: find all RuleName, add to model
+    public String home(@AuthenticationPrincipal UserDetails currentUser, Model model) {
         model.addAttribute("ruleNames", ruleNameService.getAllRuleNames());
+        model.addAttribute("currentUser", currentUser);
         return "ruleName/list";
     }
 
@@ -35,7 +33,6 @@ private final RuleNameService ruleNameService;
 
     @PostMapping("/ruleName/validate")
     public String validate(@AuthenticationPrincipal UserDetails currentUser, @Valid RuleName ruleName, BindingResult result, Model model) {
-        // TODO: check data valid and save to db, after saving return RuleName list
         if (result.hasErrors()) {
             return "ruleName/add";
         }
@@ -45,7 +42,6 @@ private final RuleNameService ruleNameService;
 
     @GetMapping("/ruleName/update/{id}")
     public String showUpdateForm(@AuthenticationPrincipal UserDetails currentUser, @PathVariable("id") Integer id, Model model) {
-        // TODO: get RuleName by Id and to model then show to the form
         RuleName ruleName = ruleNameService.getRuleNameById(id);
         model.addAttribute("ruleName", ruleName);
         return "ruleName/update";
@@ -53,8 +49,7 @@ private final RuleNameService ruleNameService;
 
     @PostMapping("/ruleName/update/{id}")
     public String updateRuleName(@AuthenticationPrincipal UserDetails currentUser, @PathVariable("id") Integer id, @Valid RuleName ruleName,
-                             BindingResult result, Model model) {
-        // TODO: check required fields, if valid call service to update RuleName and return RuleName list
+                                 BindingResult result, Model model) {
         if (result.hasErrors()) {
             model.addAttribute("ruleName", ruleName);
             return "ruleName/update";
@@ -65,7 +60,6 @@ private final RuleNameService ruleNameService;
 
     @GetMapping("/ruleName/delete/{id}")
     public String deleteRuleName(@AuthenticationPrincipal UserDetails currentUser, @PathVariable("id") Integer id, Model model) {
-        // TODO: Find RuleName by Id and delete the RuleName, return to Rule list
         ruleNameService.deleteRuleName(id);
         return "redirect:/ruleName/list";
     }

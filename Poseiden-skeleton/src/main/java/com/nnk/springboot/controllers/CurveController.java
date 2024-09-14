@@ -17,14 +17,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 @RequiredArgsConstructor
 public class CurveController {
-    // TODO: Inject Curve Point service
     private final CurvePointService curvePointService;
 
     @RequestMapping("/curvePoint/list")
     public String home(@AuthenticationPrincipal UserDetails currentUser, Model model)
     {
-        // TODO: find all Curve Point, add to model
         model.addAttribute("curvePoints", curvePointService.getCurvePoints());
+        model.addAttribute("currentUser", currentUser);
         return "curvePoint/list";
     }
 
@@ -35,7 +34,6 @@ public class CurveController {
 
     @PostMapping("/curvePoint/validate")
     public String validate(@AuthenticationPrincipal UserDetails currentUser, @Valid CurvePoint curvePoint, BindingResult result, Model model) {
-        // TODO: check data valid and save to db, after saving return Curve list
         if (result.hasErrors()) {
             return "curvePoint/add";
         }
@@ -45,7 +43,6 @@ public class CurveController {
 
     @GetMapping("/curvePoint/update/{id}")
     public String showUpdateForm(@AuthenticationPrincipal UserDetails currentUser, @PathVariable("id") Integer id, Model model) {
-        // TODO: get CurvePoint by Id and to model then show to the form
         CurvePoint curvePoint = curvePointService.getCurvePointById(id);
         model.addAttribute("curvePoint", curvePoint);
         return "curvePoint/update";
@@ -54,7 +51,6 @@ public class CurveController {
     @PostMapping("/curvePoint/update/{id}")
     public String updateBid(@AuthenticationPrincipal UserDetails currentUser, @PathVariable("id") Integer id, @Valid CurvePoint curvePoint,
                              BindingResult result, Model model) {
-        // TODO: check required fields, if valid call service to update Curve and return Curve list
         if (result.hasErrors()) {
             model.addAttribute("curvePoint", curvePoint);
             return "curvePoint/update";
@@ -64,8 +60,7 @@ public class CurveController {
     }
 
     @GetMapping("/curvePoint/delete/{id}")
-    public String deleteBid(@PathVariable("id") Integer id, Model model) {
-        // TODO: Find Curve by Id and delete the Curve, return to Curve list
+    public String deleteBid(@AuthenticationPrincipal UserDetails currentUser, @PathVariable("id") Integer id, Model model) {
         curvePointService.deleteCurvePoint(id);
         return "redirect:/curvePoint/list";
     }
