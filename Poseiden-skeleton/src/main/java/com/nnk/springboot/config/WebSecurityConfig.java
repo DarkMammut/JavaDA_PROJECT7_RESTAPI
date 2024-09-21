@@ -24,14 +24,12 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/login").permitAll()
                         .requestMatchers("/images/**", "/js/**", "/css/**", "/webjars/**").permitAll()
-//                        .requestMatchers("/admin/**").hasRole("ADMIN")
-//                        .requestMatchers("/user/**").hasRole("ADMIN")
-//                        .requestMatchers("/user/list").hasRole("ADMIN")// Restrict access to admin paths
+                        .requestMatchers("/user/**").hasAuthority("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .formLogin((form) -> form
                         .loginPage("/login")
-                        .defaultSuccessUrl("/bidList/list", true)
+                        .defaultSuccessUrl("/default", true)
                         .permitAll()
                 )
                 .logout((logout) -> logout
@@ -44,9 +42,9 @@ public class WebSecurityConfig {
                         .maximumSessions(1)
                         .maxSessionsPreventsLogin(false)
                 )
-//                .exceptionHandling((exception) -> exception
-//                        .accessDeniedPage("/403")
-//                )
+                .exceptionHandling((exception) -> exception
+                        .accessDeniedPage("/403")
+                )
                 .userDetailsService(userDetailsService);
 
         return http.build();

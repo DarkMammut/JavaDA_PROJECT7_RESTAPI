@@ -1,10 +1,24 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" 
+<html xmlns="http://www.w3.org/1999/xhtml"
 	  xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta charset="utf-8"/>
-<title>Home</title>
-<link rel="stylesheet" href="../../css/bootstrap.min.css" >
+	<meta charset="utf-8"/>
+	<title>Home</title>
+	<link rel="stylesheet" href="../../css/bootstrap.min.css">
+	<script>
+		function validateForm() {
+			const roles = document.querySelectorAll('input[name="roles"]:checked');
+			const fullname = document.getElementById('fullname').value;
+			const username = document.getElementById('username').value;
+			const password = document.getElementById('password').value;
+
+			if (!fullname || !username || !password || roles.length === 0) {
+				alert("Please fill out all required fields and select at least one role.");
+				return false; // Prevent form submission
+			}
+			return true; // Allow form submission
+		}
+	</script>
 </head>
 <body>
 <div class="container">
@@ -14,37 +28,41 @@
 	</div>
 
 	<div class="row">
-		<form action="#" th:action="@{/user/validate}" th:object="${user}" method="post" class="form-horizontal" style="width: 100%">
+		<form action="#" th:action="@{/user/validate}" th:object="${user}" method="post" class="form-horizontal"
+			  style="width: 100%" onsubmit="return validateForm()">
 			<div class="form-group">
 				<label for="fullname" class="col-sm-2 control-label">Full Name</label>
 				<div class="col-sm-10">
-					<input type="text" th:field="*{fullname}" id="fullname" placeholder="Full Name" class="col-4">
+					<input type="text" th:field="*{fullname}" id="fullname" placeholder="Full Name" class="col-4" required>
 					<p class="text-danger" th:if="${#fields.hasErrors('fullname')}" th:errors="*{fullname}"></p>
 				</div>
 			</div>
 			<div class="form-group">
 				<label for="username" class="col-sm-2 control-label">User Name</label>
 				<div class="col-sm-10">
-					<input type="text" th:field="*{username}" id="username" placeholder="User Name" class="col-4">
+					<input type="text" th:field="*{username}" id="username" placeholder="User Name" class="col-4" required>
 					<p class="text-danger" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></p>
 				</div>
 			</div>
 			<div class="form-group">
 				<label for="password" class="col-sm-2 control-label">Password</label>
 				<div class="col-sm-10">
-					<input type="password" th:field="*{password}" id="password" placeholder="Password" class="col-4">
+					<input type="password" th:field="*{password}" id="password" placeholder="Password" class="col-4" required>
 					<p class="text-danger" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></p>
 				</div>
 			</div>
 			<div class="form-group">
-				<label for="password" class="col-sm-2 control-label">Role</label>
+				<label class="col-sm-2 control-label">Role</label>
 				<div class="col-sm-10">
-					<label class="checkbox-inline"><input type="radio" th:field="*{role}" th:value="ADMIN">Admin</label>
-					<label class="checkbox-inline"><input type="radio" th:field="*{role}" th:value="USER">User</label>
-					<p class="text-danger" th:if="${#fields.hasErrors('role')}" th:errors="*{role}"></p>
+					<label class="checkbox-inline">
+						<input type="checkbox" th:field="*{roles}" name="roles" th:value="'ADMIN'">Admin
+					</label>
+					<label class="checkbox-inline">
+						<input type="checkbox" th:field="*{roles}" name="roles" th:value="'USER'">User
+					</label>
+					<p class="text-danger" th:if="${#fields.hasErrors('roles')}" th:errors="*{roles}"></p>
 				</div>
 			</div>
-
 
 			<div class="form-group">
 				<div class="col-sm-12">

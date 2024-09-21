@@ -4,7 +4,6 @@ import com.nnk.springboot.domain.User;
 import com.nnk.springboot.services.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
 
-@PreAuthorize("hasRole('ROLE_ADMIN')")
 @Controller
 public class UserController {
 

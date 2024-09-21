@@ -38,7 +38,7 @@ public class CurveController {
             return "curvePoint/add";
         }
         curvePointService.saveCurvePoint(curvePoint);
-        return "curvePoint/add";
+        return "redirect:/curvePoint/list";
     }
 
     @GetMapping("/curvePoint/update/{id}")
