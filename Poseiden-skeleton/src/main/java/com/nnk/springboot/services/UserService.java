@@ -15,6 +15,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Service class that manages user-related operations, including user authentication,
+ * password encoding, and CRUD operations for user management.
+ */
 @Service
 @RequiredArgsConstructor
 public class UserService implements UserDetailsService {
@@ -22,6 +26,14 @@ public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    /**
+     * Loads a user by username for authentication purposes.
+     * This method is required by the {@link UserDetailsService} interface.
+     *
+     * @param username the username provided for authentication.
+     * @return the {@link UserDetails} object containing user information and authorities.
+     * @throws UsernameNotFoundException if the user with the given username is not found.
+     */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(username);

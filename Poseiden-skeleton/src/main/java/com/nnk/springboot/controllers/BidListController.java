@@ -5,6 +5,7 @@ import com.nnk.springboot.services.BidListService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -22,9 +23,10 @@ public class BidListController {
     @RequestMapping("/bidList/list")
     public String home(@AuthenticationPrincipal UserDetails currentUser, Model model)
     {
-        System.out.println(currentUser);
+        System.out.println("Current authority ==>" +currentUser.getAuthorities().stream().toList().get(0));
         model.addAttribute("bidLists", bidListService.getBidLists());
         model.addAttribute("currentUser", currentUser);
+        model.addAttribute("isAdmin", currentUser.getAuthorities().stream().toList().get(0).equals(new SimpleGrantedAuthority("ADMIN")));
         return "bidList/list";
     }
 
@@ -36,10 +38,11 @@ public class BidListController {
     @PostMapping("/bidList/validate")
     public String validate(@AuthenticationPrincipal UserDetails currentUser, @Valid BidList bid, BindingResult result, Model model) {
         if (result.hasErrors()) {
+            System.out.println(result.getAllErrors());
             return "bidList/add";
         }
         bidListService.saveBidList(bid);
-        return "bidList/add";
+        return "redirect:/bidList/list";
     }
 
     @GetMapping("/bidList/update/{id}")

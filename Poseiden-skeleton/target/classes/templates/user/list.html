@@ -9,11 +9,14 @@
 <body>
 <div class="container">
 	<div class="row">
-		<div class="col-6">
-
-		</div>
 		<div class="col-6 text-right">
-			<a href="/">Home</a>&nbsp;|&nbsp;<a href="/login">Login</a>
+			<a href="/">Home</a>&nbsp;|&nbsp;
+			<a href="/bidList/list">Bid List</a>&nbsp;|&nbsp;
+			<a href="/curvePoint/list">Curve Points</a>&nbsp;|&nbsp;
+			<a href="/rating/list">Ratings</a>&nbsp;|&nbsp;
+			<a href="/trade/list">Trade</a>&nbsp;|&nbsp;
+			<a href="/ruleName/list">Rule</a>&nbsp;|&nbsp;
+			<a href="/login">Login</a>
 		</div>
 	</div>
 	<div class="row"><h2>User List</h2></div>
@@ -34,7 +37,7 @@
 					<td style="width: 10%" th:text="${user.id}"></td>
 					<td th:text="${user.fullname}"></td>
 					<td th:text="${user.username}"></td>
-					<!--<td style="width: 25%" th:text="${user.role}"></td>-->
+					<td style="width: 25%" th:text="${user.roles}"></td>
 					<td style="width: 15%" class="text-center">
 						<a th:href="@{/user/update/{id}(id=${user.id})}">Edit</a>&nbsp;|&nbsp;
 						<a th:href="@{/user/delete/{id}(id=${user.id})}">Delete</a>

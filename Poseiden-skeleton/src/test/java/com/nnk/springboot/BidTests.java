@@ -11,7 +11,6 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-////@RunWith(SpringRunner.class)
 @SpringBootTest
 public class BidTests {
 
@@ -20,25 +19,28 @@ public class BidTests {
 
 	@Test
 	public void bidListTest() {
+		// Create a BidList object
 		BidList bid = BidList.builder()
 				.account("Account Test")
 				.type("Type Test")
-				.ask(10d)
+				.ask(10d)  // Setting ask, not bidQuantity
+				.bidQuantity(15d)  // Added correct field bidQuantity
 				.build();
 
 		// Save
 		bid = bidListRepository.save(bid);
 		assertNotNull(bid.getBidListId());
-		assertEquals(bid.getBidQuantity(), 10d, 10d);
+		assertEquals(10d, bid.getAsk());  // Test 'ask' field correctly
+		assertEquals(15d, bid.getBidQuantity());
 
 		// Update
 		bid.setBidQuantity(20d);
 		bid = bidListRepository.save(bid);
-		assertEquals(bid.getBidQuantity(), 20d, 20d);
+		assertEquals(20d, bid.getBidQuantity());
 
-		// Find
+		// Find all
 		List<BidList> listResult = bidListRepository.findAll();
-		assertTrue(!listResult.isEmpty());
+		assertFalse(listResult.isEmpty());
 
 		// Delete
 		Integer id = bid.getBidListId();

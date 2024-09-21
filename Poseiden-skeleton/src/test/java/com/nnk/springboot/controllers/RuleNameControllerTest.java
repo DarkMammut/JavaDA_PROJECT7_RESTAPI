@@ -5,18 +5,25 @@ import com.nnk.springboot.services.RuleNameService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
-@WebMvcTest(RuleNameController.class)
+@SpringBootTest
+@AutoConfigureMockMvc
 public class RuleNameControllerTest {
 
     @Autowired
@@ -25,77 +32,88 @@ public class RuleNameControllerTest {
     @MockBean
     private RuleNameService ruleNameService;
 
+    private RuleName ruleName;
+
     @BeforeEach
-    void setUp() {
-        // Setup mock data or behavior if needed
+    public void setUp() {
+        ruleName = RuleName.builder()
+                .id(1)
+                .name("Test Rule")
+                .description("Test Description")
+                .json("{\"key\": \"value\"}")
+                .template("Test Template")
+                .sqlStr("SELECT * FROM Test")
+                .sqlPart("WHERE Test = 1")
+                .build();
     }
 
-    @WithMockUser(username = "testUser", roles = {"USER", "ADMIN"})
     @Test
-    public void testListRuleNames() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/ruleName/list"))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.view().name("ruleName/list"))
-                .andDo(MockMvcResultHandlers.print());
+    @WithMockUser(username = "testUser", roles = {"USER", "ADMIN"})
+    public void showRuleNameListView() throws Exception {
+        List<RuleName> ruleNames = new ArrayList<>();
+        ruleNames.add(ruleName);
+
+        when(ruleNameService.getAllRuleNames()).thenReturn(ruleNames);
+
+        mockMvc.perform(get("/ruleName/list"))
+                .andExpect(view().name("ruleName/list"))
+                .andExpect(model().attributeExists("ruleNames"))
+                .andExpect(model().attributeExists("currentUser"));
     }
 
-    @WithMockUser(username = "testUser", roles = {"USER", "ADMIN"})
     @Test
-    public void testAddRuleForm() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/ruleName/add"))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.view().name("ruleName/add"))
-                .andDo(MockMvcResultHandlers.print());
+    @WithMockUser(username = "testUser", roles = {"USER", "ADMIN"})
+    public void showAddRuleNameView() throws Exception {
+        mockMvc.perform(get("/ruleName/add"))
+                .andExpect(view().name("ruleName/add"));
     }
 
-    @WithMockUser(username = "testUser", roles = {"USER", "ADMIN"})
     @Test
-    public void testValidateRuleName() throws Exception {
-        RuleName ruleName = new RuleName(); // Initialize with test data
-        when(ruleNameService.saveRuleName(ruleName)).thenReturn(ruleName);
-
-        mockMvc.perform(MockMvcRequestBuilders.post("/ruleName/validate")
+    @WithMockUser(username = "testUser", roles = {"USER", "ADMIN"})
+    public void testValidateAddRuleName() throws Exception {
+        mockMvc.perform(post("/ruleName/validate")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .param("parameterName", "value") // replace with actual parameters
-                        .flashAttr("ruleName", ruleName))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.view().name("ruleName/add"))
-                .andDo(MockMvcResultHandlers.print());
+                        .with(csrf())
+                        .param("name", "Test Rule")
+                        .param("description", "Test Description")
+                        .param("json", "{\"key\": \"value\"}")
+                        .param("template", "Test Template")
+                        .param("sqlStr", "SELECT * FROM Test")
+                        .param("sqlPart", "WHERE Test = 1"))
+                .andExpect(view().name("redirect:/ruleName/list"));
     }
 
-    @WithMockUser(username = "testUser", roles = {"USER", "ADMIN"})
     @Test
-    public void testShowUpdateForm() throws Exception {
-        RuleName ruleName = new RuleName(); // Initialize with test data
+    @WithMockUser(username = "testUser", roles = {"USER", "ADMIN"})
+    public void showUpdateRuleNameView() throws Exception {
         when(ruleNameService.getRuleNameById(1)).thenReturn(ruleName);
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/ruleName/update/1"))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.view().name("ruleName/update"))
-                .andDo(MockMvcResultHandlers.print());
+        mockMvc.perform(get("/ruleName/update/1"))
+                .andExpect(view().name("ruleName/update"))
+                .andExpect(model().attributeExists("ruleName"));
     }
 
-    @WithMockUser(username = "testUser", roles = {"USER", "ADMIN"})
     @Test
+    @WithMockUser(username = "testUser", roles = {"USER", "ADMIN"})
     public void testUpdateRuleName() throws Exception {
-        RuleName ruleName = new RuleName(); // Initialize with test data
-        when(ruleNameService.saveRuleName(ruleName)).thenReturn(ruleName);
+        when(ruleNameService.getRuleNameById(1)).thenReturn(ruleName);
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/ruleName/update/1")
+        mockMvc.perform(post("/ruleName/update/1")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .param("parameterName", "value") // replace with actual parameters
-                        .flashAttr("ruleName", ruleName))
-                .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
-                .andExpect(MockMvcResultMatchers.redirectedUrl("/ruleName/list"))
-                .andDo(MockMvcResultHandlers.print());
+                        .param("name", "Updated Rule")
+                        .param("description", "Updated Description")
+                        .param("json", "{\"key\": \"updatedValue\"}")
+                        .param("template", "Updated Template")
+                        .param("sqlStr", "SELECT * FROM UpdatedTest")
+                        .param("sqlPart", "WHERE UpdatedTest = 1"))
+                .andExpect(view().name("redirect:/ruleName/list"));
     }
 
-    @WithMockUser(username = "testUser", roles = {"USER", "ADMIN"})
     @Test
+    @WithMockUser(username = "testUser", roles = {"USER", "ADMIN"})
     public void testDeleteRuleName() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/ruleName/delete/1"))
-                .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
-                .andExpect(MockMvcResultMatchers.redirectedUrl("/ruleName/list"))
-                .andDo(MockMvcResultHandlers.print());
+        mockMvc.perform(get("/ruleName/delete/1"))
+                .andExpect(view().name("redirect:/ruleName/list"));
     }
 }

@@ -1,6 +1,9 @@
 package com.nnk.springboot.domain;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,12 +23,16 @@ public class BidList {
     @Column
     private Integer bidListId;
 
-    @Column(nullable = false, unique = true)
+    @NotBlank(message="Account is mandatory")
+    @Column
     private String account;
 
+    @NotBlank(message="Type is mandatory")
     @Column
     private String type;
 
+    @NotNull(message="Bid Quantity can't be null")
+    @Positive(message="Bid Quantity must be positive")
     @Column
     private Double bidQuantity;
 

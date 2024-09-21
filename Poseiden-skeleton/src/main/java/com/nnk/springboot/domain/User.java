@@ -1,6 +1,6 @@
 package com.nnk.springboot.domain;
 
-
+import com.nnk.springboot.validation.ValidPassword;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -19,16 +19,17 @@ import java.util.Set;
 @Table(name = "Users")
 public class User {
     @Id
-    @GeneratedValue(strategy= GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
 
     @NotBlank(message = "Username is mandatory")
     private String username;
 
+    @ValidPassword // Utilisation de l'annotation personnalisée
     @NotBlank(message = "Password is mandatory")
     private String password;
 
-    @NotBlank(message = "FullName is mandatory")
+    @NotBlank(message = "Full Name is mandatory")
     private String fullname;
 
     @ElementCollection(fetch = FetchType.EAGER)

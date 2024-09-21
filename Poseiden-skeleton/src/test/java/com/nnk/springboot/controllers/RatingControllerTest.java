@@ -5,18 +5,25 @@ import com.nnk.springboot.services.RatingService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
-@WebMvcTest(RatingController.class)
+@SpringBootTest
+@AutoConfigureMockMvc
 public class RatingControllerTest {
 
     @Autowired
@@ -25,77 +32,81 @@ public class RatingControllerTest {
     @MockBean
     private RatingService ratingService;
 
+    private Rating rating;
+
     @BeforeEach
-    void setUp() {
-        // Setup mock data or behavior if needed
+    public void setUp() {
+        rating = Rating.builder()
+                .id(1)
+                .moodysRating("AAA")
+                .sandPRating("AA")
+                .fitchRating("A+")
+                .orderNumber(1)
+                .build();
     }
 
-    @WithMockUser(username = "testUser", roles = {"USER", "ADMIN"})
     @Test
-    public void testListRatings() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/rating/list"))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.view().name("rating/list"))
-                .andDo(MockMvcResultHandlers.print());
+    @WithMockUser(username = "testUser", roles = {"USER", "ADMIN"})
+    public void showRatingListView() throws Exception {
+        List<Rating> ratings = new ArrayList<>();
+        ratings.add(rating);
+
+        when(ratingService.getRatings()).thenReturn(ratings);
+
+        mockMvc.perform(get("/rating/list"))
+                .andExpect(view().name("rating/list"))
+                .andExpect(model().attributeExists("ratings"))
+                .andExpect(model().attributeExists("currentUser"));
     }
 
-    @WithMockUser(username = "testUser", roles = {"USER", "ADMIN"})
     @Test
-    public void testAddRatingForm() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/rating/add"))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.view().name("rating/add"))
-                .andDo(MockMvcResultHandlers.print());
+    @WithMockUser(username = "testUser", roles = {"USER", "ADMIN"})
+    public void showAddRatingView() throws Exception {
+        mockMvc.perform(get("/rating/add"))
+                .andExpect(view().name("rating/add"));
     }
 
-    @WithMockUser(username = "testUser", roles = {"USER", "ADMIN"})
     @Test
-    public void testValidateRating() throws Exception {
-        Rating rating = new Rating(); // Initialize with test data
-        when(ratingService.saveRating(rating)).thenReturn(rating);
-
-        mockMvc.perform(MockMvcRequestBuilders.post("/rating/validate")
+    @WithMockUser(username = "testUser", roles = {"USER", "ADMIN"})
+    public void testValidateAddRating() throws Exception {
+        mockMvc.perform(post("/rating/validate")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .param("parameterName", "value") // replace with actual parameters
-                        .flashAttr("rating", rating))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.view().name("rating/add"))
-                .andDo(MockMvcResultHandlers.print());
+                        .with(csrf())
+                        .param("moodysRating", "AAA")
+                        .param("sandPRating", "AA")
+                        .param("fitchRating", "A+")
+                        .param("orderNumber", "1"))
+                .andExpect(view().name("redirect:/rating/list"));
     }
 
-    @WithMockUser(username = "testUser", roles = {"USER", "ADMIN"})
     @Test
-    public void testShowUpdateForm() throws Exception {
-        Rating rating = new Rating(); // Initialize with test data
+    @WithMockUser(username = "testUser", roles = {"USER", "ADMIN"})
+    public void showUpdateRatingView() throws Exception {
         when(ratingService.getRatingById(1)).thenReturn(rating);
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/rating/update/1"))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.view().name("rating/update"))
-                .andDo(MockMvcResultHandlers.print());
+        mockMvc.perform(get("/rating/update/1"))
+                .andExpect(view().name("rating/update"));
     }
 
-    @WithMockUser(username = "testUser", roles = {"USER", "ADMIN"})
     @Test
+    @WithMockUser(username = "testUser", roles = {"USER", "ADMIN"})
     public void testUpdateRating() throws Exception {
-        Rating rating = new Rating(); // Initialize with test data
-        when(ratingService.saveRating(rating)).thenReturn(rating);
+        when(ratingService.getRatingById(1)).thenReturn(rating);
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/rating/update/1")
+        mockMvc.perform(post("/rating/update/1")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .param("parameterName", "value") // replace with actual parameters
-                        .flashAttr("rating", rating))
-                .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
-                .andExpect(MockMvcResultMatchers.redirectedUrl("/rating/list"))
-                .andDo(MockMvcResultHandlers.print());
+                        .param("moodysRating", "A+")
+                        .param("sandPRating", "A")
+                        .param("fitchRating", "B")
+                        .param("orderNumber", "2"))
+                .andExpect(view().name("redirect:/rating/list"));
     }
 
-    @WithMockUser(username = "testUser", roles = {"USER", "ADMIN"})
     @Test
+    @WithMockUser(username = "testUser", roles = {"USER", "ADMIN"})
     public void testDeleteRating() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/rating/delete/1"))
-                .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
-                .andExpect(MockMvcResultMatchers.redirectedUrl("/rating/list"))
-                .andDo(MockMvcResultHandlers.print());
+        mockMvc.perform(get("/rating/delete/1"))
+                .andExpect(view().name("redirect:/rating/list"));
     }
 }

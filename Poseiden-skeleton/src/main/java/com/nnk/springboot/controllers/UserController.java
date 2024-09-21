@@ -4,10 +4,9 @@ import com.nnk.springboot.domain.User;
 import com.nnk.springboot.services.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -18,12 +17,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
 
-@PreAuthorize("hasRole('ROLE_ADMIN')")
 @Controller
 public class UserController {
 
+    private final UserService userService;
+    private final PasswordEncoder passwordEncoder;
+
     @Autowired
-    private UserService userService;
+    public UserController(UserService userService, PasswordEncoder passwordEncoder) {
+        this.userService = userService;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @RequestMapping("/user/list")
     public String home(@AuthenticationPrincipal UserDetails currentUser, Model model) {
@@ -41,8 +45,7 @@ public class UserController {
     @PostMapping("/user/validate")
     public String validate(@AuthenticationPrincipal UserDetails currentUser, @Valid User user, BindingResult result, Model model) {
         if (!result.hasErrors()) {
-            BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-            user.setPassword(encoder.encode(user.getPassword()));
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
             userService.saveUser(user);
             return "redirect:/user/list";
         }
@@ -67,8 +70,7 @@ public class UserController {
             return "user/update";
         }
 
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        user.setPassword(encoder.encode(user.getPassword()));
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setId(id);
         userService.saveUser(user);
         return "redirect:/user/list";

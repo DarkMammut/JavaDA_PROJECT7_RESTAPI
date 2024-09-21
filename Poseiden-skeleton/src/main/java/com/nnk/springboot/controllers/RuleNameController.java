@@ -37,7 +37,7 @@ public class RuleNameController {
             return "ruleName/add";
         }
         ruleNameService.saveRuleName(ruleName);
-        return "ruleName/add";
+        return "redirect:/ruleName/list";
     }
 
     @GetMapping("/ruleName/update/{id}")

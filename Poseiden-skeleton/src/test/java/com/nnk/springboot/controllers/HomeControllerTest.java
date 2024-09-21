@@ -2,31 +2,32 @@ package com.nnk.springboot.controllers;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
-@WebMvcTest(HomeController.class)
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+
+@SpringBootTest
+@AutoConfigureMockMvc
 public class HomeControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @Test
-    public void testHome() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/"))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.view().name("home"))
-                .andDo(MockMvcResultHandlers.print());
+    @WithMockUser(username = "testUser", roles = {"USER"})
+    public void testHomePage() throws Exception {
+        mockMvc.perform(get("/"))
+                .andExpect(view().name("home"));
     }
 
     @Test
-    public void testAdminHome() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/admin/home"))
-                .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
-                .andExpect(MockMvcResultMatchers.redirectedUrl("/bidList/list"))
-                .andDo(MockMvcResultHandlers.print());
+    @WithMockUser(username = "adminUser", roles = {"ADMIN"})
+    public void testAdminHomePage() throws Exception {
+        mockMvc.perform(get("/admin/home"))
+                .andExpect(view().name("redirect:/user/list"));
     }
 }

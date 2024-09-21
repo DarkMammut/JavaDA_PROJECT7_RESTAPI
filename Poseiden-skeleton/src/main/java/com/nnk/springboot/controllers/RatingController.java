@@ -38,7 +38,7 @@ public class RatingController {
             return "rating/add";
         }
         ratingService.saveRating(rating);
-        return "rating/add";
+        return "redirect:/rating/list";
     }
 
     @GetMapping("/rating/update/{id}")

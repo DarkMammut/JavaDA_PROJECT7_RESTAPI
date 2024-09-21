@@ -5,18 +5,26 @@ import com.nnk.springboot.services.TradeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
-@WebMvcTest(TradeController.class)
+@SpringBootTest
+@AutoConfigureMockMvc
 public class TradeControllerTest {
 
     @Autowired
@@ -25,77 +33,98 @@ public class TradeControllerTest {
     @MockBean
     private TradeService tradeService;
 
+    private Trade trade;
+
     @BeforeEach
-    void setUp() {
-        // Setup mock data or behavior if needed
+    public void setUp() {
+        trade = Trade.builder()
+                .tradeId(1)
+                .account("Test Account")
+                .type("Test Type")
+                .buyQuantity(100.0)
+                .sellQuantity(150.0)
+                .buyPrice(200.0)
+                .sellPrice(250.0)
+                .benchmark("Test Benchmark")
+                .tradeDate(new Timestamp(System.currentTimeMillis()))
+                .security("Test Security")
+                .status("Test Status")
+                .trader("Test Trader")
+                .book("Test Book")
+                .creationName("Test Creator")
+                .creationDate(new Timestamp(System.currentTimeMillis()))
+                .revisionName("Test Revision")
+                .revisionDate(new Timestamp(System.currentTimeMillis()))
+                .dealName("Test Deal")
+                .dealType("Test Deal Type")
+                .sourceListId("Test Source ID")
+                .side("Buy")
+                .build();
     }
 
-    @WithMockUser(username = "testUser", roles = {"USER", "ADMIN"})
     @Test
-    public void testListTrades() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/trade/list"))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.view().name("trade/list"))
-                .andDo(MockMvcResultHandlers.print());
+    @WithMockUser(username = "testUser", roles = {"USER", "ADMIN"})
+    public void showTradeListView() throws Exception {
+        List<Trade> trades = new ArrayList<>();
+        trades.add(trade);
+
+        when(tradeService.findAllTrades()).thenReturn(trades);
+
+        mockMvc.perform(get("/trade/list"))
+                .andExpect(view().name("trade/list"))
+                .andExpect(model().attributeExists("trades"))
+                .andExpect(model().attributeExists("currentUser"));
     }
 
-    @WithMockUser(username = "testUser", roles = {"USER", "ADMIN"})
     @Test
-    public void testAddTradeForm() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/trade/add"))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.view().name("trade/add"))
-                .andDo(MockMvcResultHandlers.print());
+    @WithMockUser(username = "testUser", roles = {"USER", "ADMIN"})
+    public void showAddTradeView() throws Exception {
+        mockMvc.perform(get("/trade/add"))
+                .andExpect(view().name("trade/add"));
     }
 
-    @WithMockUser(username = "testUser", roles = {"USER", "ADMIN"})
     @Test
-    public void testValidateTrade() throws Exception {
-        Trade trade = new Trade(); // Initialize with test data
-        when(tradeService.saveTrade(trade)).thenReturn(trade);
-
-        mockMvc.perform(MockMvcRequestBuilders.post("/trade/validate")
+    @WithMockUser(username = "testUser", roles = {"USER", "ADMIN"})
+    public void testValidateAddTrade() throws Exception {
+        mockMvc.perform(post("/trade/validate")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .param("parameterName", "value") // replace with actual parameters
-                        .flashAttr("trade", trade))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.view().name("trade/add"))
-                .andDo(MockMvcResultHandlers.print());
+                        .with(csrf())
+                        .param("account", "Test Account")
+                        .param("type", "Test Type")
+                        .param("buyQuantity", "100.0")
+                        .param("sellQuantity", "150.0"))
+                .andExpect(view().name("redirect:/trade/list"));
     }
 
-    @WithMockUser(username = "testUser", roles = {"USER", "ADMIN"})
     @Test
-    public void testShowUpdateForm() throws Exception {
-        Trade trade = new Trade(); // Initialize with test data
+    @WithMockUser(username = "testUser", roles = {"USER", "ADMIN"})
+    public void showUpdateTradeView() throws Exception {
         when(tradeService.findTradeById(1)).thenReturn(trade);
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/trade/update/1"))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.view().name("trade/update"))
-                .andDo(MockMvcResultHandlers.print());
+        mockMvc.perform(get("/trade/update/1"))
+                .andExpect(view().name("trade/update"))
+                .andExpect(model().attributeExists("trade"));
     }
 
-    @WithMockUser(username = "testUser", roles = {"USER", "ADMIN"})
     @Test
+    @WithMockUser(username = "testUser", roles = {"USER", "ADMIN"})
     public void testUpdateTrade() throws Exception {
-        Trade trade = new Trade(); // Initialize with test data
-        when(tradeService.updateTrade(1, trade)).thenReturn(trade);
+        when(tradeService.findTradeById(1)).thenReturn(trade);
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/trade/update/1")
+        mockMvc.perform(post("/trade/update/1")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .param("parameterName", "value") // replace with actual parameters
-                        .flashAttr("trade", trade))
-                .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
-                .andExpect(MockMvcResultMatchers.redirectedUrl("/trade/list"))
-                .andDo(MockMvcResultHandlers.print());
+                        .param("account", "Updated Account")
+                        .param("type", "Updated Type")
+                        .param("buyQuantity", "120.0")
+                        .param("sellQuantity", "180.0"))
+                .andExpect(view().name("redirect:/trade/list"));
     }
 
-    @WithMockUser(username = "testUser", roles = {"USER", "ADMIN"})
     @Test
+    @WithMockUser(username = "testUser", roles = {"USER", "ADMIN"})
     public void testDeleteTrade() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/trade/delete/1"))
-                .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
-                .andExpect(MockMvcResultMatchers.redirectedUrl("/trade/list"))
-                .andDo(MockMvcResultHandlers.print());
+        mockMvc.perform(get("/trade/delete/1"))
+                .andExpect(view().name("redirect:/trade/list"));
     }
 }

@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -22,6 +23,9 @@ class UserServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
 
     @InjectMocks
     private UserService userService;
@@ -60,16 +64,17 @@ class UserServiceTest {
     void saveUser_shouldSaveUser() {
         User user = User.builder()
                 .username("testUser")
-                .password("testPassword")
+                .password("Password123!")  // Raw password before encoding
                 .roles(Set.of("ROLE_USER"))
                 .build();
 
+        when(passwordEncoder.encode("Password123!")).thenReturn("encodedPassword");
         when(userRepository.save(user)).thenReturn(user);
 
         User savedUser = userService.saveUser(user);
 
         assertEquals("testUser", savedUser.getUsername());
-        assertEquals("testPassword", savedUser.getPassword());
+        assertEquals("encodedPassword", savedUser.getPassword());
         assertEquals(Set.of("ROLE_USER"), savedUser.getRoles());
         verify(userRepository, times(1)).save(user);
     }
